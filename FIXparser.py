@@ -84,11 +84,13 @@ for file in files:
 
                 diff_time = apacket.timestamp - packet.timestamp
                 if diff_time > 0 and diff_time < 1:
-                    print(packet.strts)
-
-                    print("%s %d %s %d" % ( inet_to_str(packet.srcip), packet.srcport, inet_to_str(packet.dstip), packet.dstport))
-                    print("%s %d %s %d" % ( inet_to_str(apacket.srcip), apacket.srcport, inet_to_str(apacket.dstip), apacket.dstport))
-                    print('Diff time: %3.6f'  % diff_time )
+                    #print(packet.strts,end='')
+                    #print(apacket.strts, end='')
+                    print("%s %s" % (packet.strts,apacket.strts),end='')
+                    #print("%s %d %s %d" % ( inet_to_str(packet.srcip), packet.srcport, inet_to_str(packet.dstip), packet.dstport),end='')
+                    #print("%s %d %s %d" % ( inet_to_str(apacket.srcip), apacket.srcport, inet_to_str(apacket.dstip), apacket.dstport))
+                    print(" %s %d <=> %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.dstport),end='')
+                    print(' %3.6f'  % diff_time )
 
     f.close()
 
