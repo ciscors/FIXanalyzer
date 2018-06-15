@@ -5,13 +5,9 @@ import socket
 import os
 
 
+CAPSDIR="E:\\DASH-CAPS\\DUMP110618"
 
 
-files = []
-for i in os.listdir("E:\\DASH-CAPS\\DUMP110618"):
-    if i.endswith('.cap'):
-        files.append(i)
-        print(i)
 
 
 
@@ -34,6 +30,11 @@ def inet_to_str(inet):
         return socket.inet_ntop(socket.AF_INET, inet)
     except ValueError:
         return socket.inet_ntop(socket.AF_INET)
+
+files = []
+for i in os.listdir(CAPSDIR):
+    if i.endswith('.cap'):
+        files.append(i)
 
 
 for file in files:
@@ -74,22 +75,13 @@ for file in files:
 
     for packet in PACKETS:
 
-    #print (inet_to_str(packet.srcip), packet.srcport, inet_to_str(packet.dstip), packet.dstport, packet.seqnum, packet.acknum)
-
-        #print("%s %d %s %d" %(inet_to_str(packet.srcip), packet.srcport, inet_to_str(packet.dstip), packet.dstport))
         for apacket in APACKETS:
             if packet.acknum == apacket.seqnum:
 
-            #print (inet_to_str(apacket.srcip),apacket.srcport, inet_to_str(apacket.dstip),apacket.dstport,apacket.seqnum,apacket.acknum)
-
                 diff_time = apacket.timestamp - packet.timestamp
                 if diff_time > 0 and diff_time < 1:
-                    #print(packet.strts,end='')
-                    #print(apacket.strts, end='')
                     print("%s %s" % (packet.strts,apacket.strts),end='')
-                    #print("%s %d %s %d" % ( inet_to_str(packet.srcip), packet.srcport, inet_to_str(packet.dstip), packet.dstport),end='')
-                    #print("%s %d %s %d" % ( inet_to_str(apacket.srcip), apacket.srcport, inet_to_str(apacket.dstip), apacket.dstport))
-                    print(" %s %d <=> %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.dstport),end='')
+                    print(" %s %d %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.dstport),end='')
                     print(' %3.6f'  % diff_time )
 
     f.close()
