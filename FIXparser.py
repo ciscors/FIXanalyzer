@@ -4,7 +4,7 @@ import sys
 import socket
 import os
 
-pcapfile = "E:\\DUMPS\\test2.pcap"
+#pcapfile = "E:\\DUMPS\\test2.pcap"
 
 
 files = []
