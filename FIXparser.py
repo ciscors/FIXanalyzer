@@ -7,7 +7,8 @@ import os
 
 
 CAPSDIR="E:\\DASH-CAPS\\DUMP110618"
-SRVIP = "192.168.9.143"
+SRVIP = "192.168.9.142"
+debug = 0
 
 
 
@@ -39,7 +40,23 @@ for i in os.listdir(CAPSDIR):
         files.append(i)
 
 csvfile = CAPSDIR+"\\"+SRVIP+"-output.csv"
-outfile = open(csvfile,"w")
+rawfile = CAPSDIR+"\\"+SRVIP+"-raw.csv"
+small_rawfile = CAPSDIR+"\\"+SRVIP+"-smallraw.csv"
+
+try:
+    csv_outfile = open(csvfile, "w")
+except IOError:
+    print("Cant't open file $s " % csvfile)
+try:
+    raw_outfile = open(rawfile, "w")
+except IOError:
+    print("Cant't open file $s " % rawfile)
+
+try:
+    small_outfile = open(small_rawfile, "w")
+except IOError:
+    print("Cant't open file $s " % small_rawfile)
+
 
 for file in files:
 
@@ -69,8 +86,9 @@ for file in files:
         myfix.seqnum = tcp.seq
         myfix.timestamp = ts
         myfix.strts = str(datetime.datetime.utcfromtimestamp(ts))
+        dstIP = inet_to_str(myfix.dstip)
 
-        if "8=FIX.4.2" in str(tcp.data):
+        if "8=FIX.4.2" in str(tcp.data) and dstIP == SRVIP:
             PACKETS.append(myfix)
         else:
             APACKETS.append(myfix)
@@ -86,15 +104,29 @@ for file in files:
                 diff_time = apacket.timestamp - packet.timestamp
                 #Exclude packets with negative and more then 1s time replay
                 if diff_time > 0 and diff_time < 1:
-                    print("%s %s" % (packet.strts,apacket.strts),end='')
-                    print(" %s %d %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.srcport),end='')
-                    print(' %3.6f'  % diff_time )
-                    outstr = "{},{},{},{},{},{},{:3.6f}\n".format(packet.strts,apacket.strts,inet_to_str(packet.srcip),
-                                                                  packet.srcport, inet_to_str(apacket.srcip), apacket.srcport,diff_time)
-                    outfile.write(outstr)
+                    if debug == 1:
+                        print("%s %s" % (packet.strts,apacket.strts),end='')
+                        print(" %s %d %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.srcport),end='')
+                        print(' %3.6f'  % diff_time )
+
+                    csv_outstr = "{},{},{},{},{},{},{:3.6f}\n".format(packet.strts, apacket.strts, inet_to_str(packet.srcip),
+                                                                      packet.srcport, inet_to_str(apacket.srcip), apacket.srcport, diff_time)
+                    csv_outfile.write(csv_outstr)
+
+                    raw_outstr = "{:.0f},{:.0f},{},{},{},{},{:3.6f}\n".format(packet.timestamp, apacket.timestamp,
+                                                                      inet_to_str(packet.srcip),
+                                                                      packet.srcport, inet_to_str(apacket.srcip),
+                                                                      apacket.srcport, diff_time)
+                    raw_outfile.write(raw_outstr)
+
+                    small_outstr = "{:.0f},{:3.6f}\n".format(packet.timestamp, diff_time)
+                    small_outfile.write(small_outstr)
+
     f.close()
 
-outfile.close()
+csv_outfile.close()
+raw_outfile.close()
+small_outfile.close()
 
 
 
