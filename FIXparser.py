@@ -7,7 +7,7 @@ import os
 
 
 CAPSDIR="E:\\DASH-CAPS\\DUMP110618"
-SRVIP = "192.168.9.142"
+SRVIP = "192.168.9.143"
 
 
 
@@ -76,6 +76,7 @@ for file in files:
             APACKETS.append(myfix)
 
 #Analyze FIX packets
+#Find pair FIX packets by ACKNUM and SEQNUM
 
     for packet in PACKETS:
 
@@ -83,6 +84,7 @@ for file in files:
             if packet.acknum == apacket.seqnum:
 
                 diff_time = apacket.timestamp - packet.timestamp
+                #Exclude packets with negative and more then 1s time replay
                 if diff_time > 0 and diff_time < 1:
                     print("%s %s" % (packet.strts,apacket.strts),end='')
                     print(" %s %d %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.srcport),end='')
