@@ -7,7 +7,7 @@ import os
 
 
 CAPSDIR="E:\\DASH-CAPS\\DUMP110618"
-
+SRVIP = "192.168.9.142"
 
 
 
@@ -34,9 +34,11 @@ def inet_to_str(inet):
 
 files = []
 for i in os.listdir(CAPSDIR):
-    if i.endswith('.cap'):
+    if i.endswith('.cap') and i.startswith(SRVIP):
         files.append(i)
 
+csvfile = CAPSDIR+"\\"+SRVIP+"-output.csv"
+outfile = open(csvfile,"w")
 
 for file in files:
 
@@ -82,10 +84,14 @@ for file in files:
                 diff_time = apacket.timestamp - packet.timestamp
                 if diff_time > 0 and diff_time < 1:
                     print("%s %s" % (packet.strts,apacket.strts),end='')
-                    print(" %s %d %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.dstport),end='')
+                    print(" %s %d %s %d " % (inet_to_str(packet.srcip), packet.srcport, inet_to_str(apacket.srcip), apacket.srcport),end='')
                     print(' %3.6f'  % diff_time )
-
+                    outstr = "{},{},{},{},{},{},{:3.6f}\n".format(packet.strts,apacket.strts,inet_to_str(packet.srcip),
+                                                                  packet.srcport, inet_to_str(apacket.srcip), apacket.srcport,diff_time)
+                    outfile.write(outstr)
     f.close()
+
+outfile.close()
 
 
 
