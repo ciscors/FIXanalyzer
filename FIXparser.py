@@ -1,13 +1,15 @@
 import dpkt
 import datetime
+import time
 import sys
 import socket
 import os
+from pytz import timezone
 
 
 
-CAPSDIR="E:\\DASH-CAPS\\DUMP110618"
-SRVIP = "192.168.9.142"
+CAPSDIR="E:\\DASH-CAPS\\DUMPS-1806"
+SRVIP = "192.168.9.143"
 debug = 0
 
 
@@ -34,7 +36,15 @@ def inet_to_str(inet):
     except ValueError:
         return socket.inet_ntop(socket.AF_INET)
 
+
+
+
 files = []
+
+
+
+
+
 for i in os.listdir(CAPSDIR):
     if i.endswith('.cap') and i.startswith(SRVIP):
         files.append(i)
@@ -60,12 +70,12 @@ except IOError:
 
 for file in files:
 
+    PACKETS = []    #Packets with FIX Heartbeat
+    APACKETS = []   #All other packets
 
-    PACKETS = []
-    APACKETS = []
 
 
-    pcapfile = "E:\\DASH-CAPS\\DUMP110618\\"+file
+    pcapfile = CAPSDIR+"\\"+file
     f = open(pcapfile,'rb')
     pcap = dpkt.pcap.Reader(f)
 
@@ -85,7 +95,8 @@ for file in files:
         myfix.acknum = tcp.ack
         myfix.seqnum = tcp.seq
         myfix.timestamp = ts
-        myfix.strts = str(datetime.datetime.utcfromtimestamp(ts))
+        tstamp = datetime.datetime.fromtimestamp(ts)
+        myfix.strts = str(tstamp.astimezone(timezone('US/Central')))
         dstIP = inet_to_str(myfix.dstip)
 
         if "8=FIX.4.2" in str(tcp.data) and dstIP == SRVIP:
