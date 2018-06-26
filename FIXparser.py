@@ -5,16 +5,15 @@ import sys
 import socket
 import os
 from pytz import timezone
+import numpy as np
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
 
 
-
-CAPSDIR="E:\\DASH-CAPS\\DUMPS-1806"
-SRVIP = "192.168.9.143"
+DATA="1806"
+CAPSDIR="E:\\DASH-CAPS\\DUMPS-"+DATA
+SRVIP = "192.168.9.142"
 debug = 0
-
-
-
-
 
 
 class FIX_PACKET:
@@ -29,6 +28,8 @@ class FIX_PACKET:
     strts = None
 
 
+DIFFS=[]
+
 def inet_to_str(inet):
 
     try:
@@ -40,10 +41,6 @@ def inet_to_str(inet):
 
 
 files = []
-
-
-
-
 
 for i in os.listdir(CAPSDIR):
     if i.endswith('.cap') and i.startswith(SRVIP):
@@ -66,7 +63,6 @@ try:
     small_outfile = open(small_rawfile, "w")
 except IOError:
     print("Cant't open file $s " % small_rawfile)
-
 
 for file in files:
 
@@ -108,7 +104,6 @@ for file in files:
 #Find pair FIX packets by ACKNUM and SEQNUM
 
     for packet in PACKETS:
-
         for apacket in APACKETS:
             if packet.acknum == apacket.seqnum:
 
@@ -132,12 +127,27 @@ for file in files:
 
                     small_outstr = "{:.0f},{:3.6f}\n".format(packet.timestamp, diff_time)
                     small_outfile.write(small_outstr)
+                    DIFFS.append(diff_time)
 
     f.close()
+
+
 
 csv_outfile.close()
 raw_outfile.close()
 small_outfile.close()
 
+
+PICFILE="E:\\picture\\"+SRVIP+"-"+DATA+".pdf"
+
+num_bins = 100
+range = (0.000001,0.0001)
+
+n, bins, patches = plt.hist(DIFFS, num_bins, range, facecolor='blue', alpha=0.5)
+plt.xlabel('microsec')
+plt.ylabel('')
+TITLE = SRVIP+"\n"+DATA+"18"
+plt.title(TITLE)
+plt.savefig(PICFILE)
 
 
